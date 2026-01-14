@@ -9,20 +9,17 @@ function getAsync(sql, params = []) {
 async function requireUser(req, res, next) {
   try {
     const userIdRaw = req.header("x-user-id");
-    if (!userIdRaw) {
-      return res.status(401).json({ message: "Missing x-user-id header" });
-    }
+    if (!userIdRaw) return res.status(401).json({ message: "Missing x-user-id header" });
+
     const userId = Number(userIdRaw);
-    if (!Number.isFinite(userId)) {
-      return res.status(401).json({ message: "Invalid x-user-id" });
-    }
+    if (!Number.isFinite(userId)) return res.status(401).json({ message: "Invalid x-user-id" });
 
     const user = await getAsync(
       `SELECT id, email, name, role, region FROM users WHERE id = ?`,
       [userId]
     );
-
     if (!user) return res.status(401).json({ message: "User not found" });
+
     req.user = user;
     next();
   } catch (e) {
