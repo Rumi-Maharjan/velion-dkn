@@ -2,10 +2,13 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 
-const DB_PATH = process.env.DB_PATH || path.join(__dirname, "db/database.sqlite");
-const UPLOAD_PATH = process.env.UPLOAD_PATH || path.join(__dirname, "../uploads");
+const DB_PATH =
+  process.env.DB_PATH || path.join(__dirname, "db/database.sqlite");
+const UPLOAD_PATH =
+  process.env.UPLOAD_PATH || path.join(__dirname, "../uploads");
 
-require("./db/sqlite")(DB_PATH); // ensure DB init runs
+
+require("./db/sqlite"); // ensure DB init runs
 require("./db/contentSchema");
 require("./db/collaborationSchema");
 
@@ -32,4 +35,6 @@ app.use("/api/users", require("./routes/userSearch"));
 app.use("/api/content-items", require("./routes/contentSearch"));
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Backend running at http://localhost:${PORT}`));
+app.listen(PORT, () =>
+  console.log(`Backend running at http://localhost:${PORT}`)
+);
