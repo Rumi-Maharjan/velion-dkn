@@ -1,5 +1,7 @@
 import {
+  ChevronDown,
   ChevronRight,
+  ChevronUp,
   Clock,
   Download,
   FileText,
@@ -23,6 +25,7 @@ export default function Collaboration() {
   const [workspaces, setWorkspaces] = useState([]);
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showCreateForm, setShowCreateForm] = useState(false); // New state
 
   // Get current user - using velion_user from your login
   const currentUser = JSON.parse(localStorage.getItem("velion_user") || "null");
@@ -150,6 +153,7 @@ export default function Collaboration() {
 
       setWsName("");
       setWsDesc("");
+      setShowCreateForm(false); // Close form after creation
       toast.success(`Workspace "${wsName}" created successfully`);
       await loadWorkspaces();
     } catch (err) {
@@ -258,84 +262,103 @@ export default function Collaboration() {
             Team collaboration with shared documents and real-time messaging
           </p>
         </div>
-        <button
-          onClick={() => loadWorkspaces(true)}
-          disabled={loading}
-          className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
-          {loading ? "Refreshing..." : "Refresh"}
-        </button>
-      </div>
-
-      {/* Create Workspace Card */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center">
-            <Plus className="text-blue-600" size={22} />
-          </div>
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900">
-              Create New Workspace
-            </h2>
-            <p className="text-sm text-gray-500">
-              Start a new collaboration space for your team
-            </p>
-          </div>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowCreateForm(!showCreateForm)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-xl shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200"
+          >
+            <Plus size={18} />
+            {showCreateForm ? "Cancel" : "Create Workspace"}
+            {showCreateForm ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+          </button>
+          <button
+            onClick={() => loadWorkspaces(true)}
+            disabled={loading}
+            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
+            {loading ? "Refreshing..." : "Refresh"}
+          </button>
         </div>
-
-        <form onSubmit={createWorkspace} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">
-                Workspace Name *
-              </label>
-              <input
-                type="text"
-                value={wsName}
-                onChange={(e) => setWsName(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
-                placeholder="e.g., React Development Team"
-                required
-                disabled={creating}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">
-                Description
-              </label>
-              <input
-                type="text"
-                value={wsDesc}
-                onChange={(e) => setWsDesc(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
-                placeholder="What's this workspace about?"
-                disabled={creating}
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              disabled={creating || !wsName.trim()}
-              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-xl shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
-            >
-              {creating ? (
-                <span className="flex items-center gap-2">
-                  <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Creating...
-                </span>
-              ) : (
-                <span className="flex items-center gap-2">
-                  <Plus size={18} />
-                  Create Workspace
-                </span>
-              )}
-            </button>
-          </div>
-        </form>
       </div>
+
+      {/* Create Workspace Card - Now Collapsible */}
+      {showCreateForm && (
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 animate-fadeIn">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center">
+              <Plus className="text-blue-600" size={22} />
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900">
+                Create New Workspace
+              </h2>
+              <p className="text-sm text-gray-500">
+                Start a new collaboration space for your team
+              </p>
+            </div>
+          </div>
+
+          <form onSubmit={createWorkspace} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">
+                  Workspace Name *
+                </label>
+                <input
+                  type="text"
+                  value={wsName}
+                  onChange={(e) => setWsName(e.target.value)}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                  placeholder="e.g., React Development Team"
+                  required
+                  disabled={creating}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">
+                  Description
+                </label>
+                <input
+                  type="text"
+                  value={wsDesc}
+                  onChange={(e) => setWsDesc(e.target.value)}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                  placeholder="What's this workspace about?"
+                  disabled={creating}
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setShowCreateForm(false)}
+                className="px-6 py-3 bg-white border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={creating || !wsName.trim()}
+                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-xl shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+              >
+                {creating ? (
+                  <span className="flex items-center gap-2">
+                    <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Creating...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    <Plus size={18} />
+                    Create Workspace
+                  </span>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {/* Main Collaboration Area */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

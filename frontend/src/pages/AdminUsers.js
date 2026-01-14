@@ -13,7 +13,9 @@ import {
   Trash2,
   Edit2,
   CheckCircle,
-  XCircle
+  XCircle,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react";
 
 export default function AdminUsers() {
@@ -21,10 +23,11 @@ export default function AdminUsers() {
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
   const [editingUserId, setEditingUserId] = useState(null);
+  const [showCreateForm, setShowCreateForm] = useState(false); // New state
 
   const [form, setForm] = useState({
     email: "",
-    password: "pass123",
+    password: "",
     name: "",
     role: "CONSULTANT",
     region: "EU",
@@ -69,7 +72,7 @@ export default function AdminUsers() {
     const toastId = toast.loading("Creating user...");
     
     try {
-      const res = await api.post("/users", form);
+      const res = await api.post("/admin/users", form);
       
       toast.update(toastId, {
         render: `User ${form.name} created successfully!`,
@@ -80,12 +83,15 @@ export default function AdminUsers() {
       
       setForm({
         email: "",
-        password: "pass123",
+        password: "",
         name: "",
         role: "CONSULTANT",
         region: "EU",
         expertise: "",
       });
+      
+      // Collapse form after successful creation
+      setShowCreateForm(false);
       
       await loadUsers();
     } catch (err) {
@@ -104,7 +110,7 @@ export default function AdminUsers() {
     if (!window.confirm(`Are you sure you want to delete ${userName}?`)) return;
     
     try {
-      await api.delete(`/users/${userId}`);
+      await api.delete(`/admin/users/${userId}`);
       toast.success(`User ${userName} deleted successfully`);
       await loadUsers();
     } catch (err) {
@@ -126,7 +132,7 @@ export default function AdminUsers() {
     const toastId = toast.loading("Updating user...");
     
     try {
-      await api.put(`/users/${userId}`, editForm);
+      await api.put(`/admin/users/${userId}`, editForm);
       
       toast.update(toastId, {
         render: "User updated successfully!",
@@ -172,150 +178,169 @@ export default function AdminUsers() {
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">User Management</h1>
           <p className="text-gray-600 mt-1">Create, edit, and manage system users and roles</p>
         </div>
-        <button
-          onClick={loadUsers}
-          disabled={loading}
-          className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
-          {loading ? "Refreshing..." : "Refresh Users"}
-        </button>
-      </div>
-
-      {/* Create User Card */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-100 to-indigo-50 flex items-center justify-center">
-            <UserPlus className="text-indigo-600" size={22} />
-          </div>
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900">Create New User</h2>
-            <p className="text-sm text-gray-500">Add new users to the Velion DKN system</p>
-          </div>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowCreateForm(!showCreateForm)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-xl shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200"
+          >
+            <UserPlus size={18} />
+            {showCreateForm ? "Cancel" : "Create New User"}
+            {showCreateForm ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+          </button>
+          <button
+            onClick={loadUsers}
+            disabled={loading}
+            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
+            {loading ? "Refreshing..." : "Refresh"}
+          </button>
         </div>
-
-        <form onSubmit={createUser} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Name */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                <User size={14} />
-                Full Name *
-              </label>
-              <input
-                type="text"
-                value={form.name}
-                onChange={(e) => setField("name", e.target.value)}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
-                placeholder="John Consultant"
-                required
-              />
-            </div>
-
-            {/* Email */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                <Mail size={14} />
-                Email Address *
-              </label>
-              <input
-                type="email"
-                value={form.email}
-                onChange={(e) => setField("email", e.target.value)}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
-                placeholder="name@velion.com"
-                required
-              />
-            </div>
-
-            {/* Password */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                <Key size={14} />
-                Password *
-              </label>
-              <input
-                type="text"
-                value={form.password}
-                onChange={(e) => setField("password", e.target.value)}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
-                required
-              />
-              <p className="text-xs text-gray-500">Default password shown for demo purposes</p>
-            </div>
-
-            {/* Role */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                <Shield size={14} />
-                Role *
-              </label>
-              <select
-                value={form.role}
-                onChange={(e) => setField("role", e.target.value)}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
-              >
-                <option value="CONSULTANT">Consultant</option>
-                <option value="CHAMPION">Knowledge Champion</option>
-                <option value="ADMIN">System Administrator</option>
-              </select>
-            </div>
-
-            {/* Region */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                <Globe size={14} />
-                Region *
-              </label>
-              <select
-                value={form.region}
-                onChange={(e) => setField("region", e.target.value)}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
-              >
-                <option value="EU">Europe (EU)</option>
-                <option value="ASIA">Asia</option>
-                <option value="NA">North America</option>
-                <option value="GLOBAL">Global</option>
-              </select>
-            </div>
-
-            {/* Expertise */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                <Briefcase size={14} />
-                Expertise
-              </label>
-              <input
-                type="text"
-                value={form.expertise}
-                onChange={(e) => setField("expertise", e.target.value)}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
-                placeholder="React, Security, AI, etc."
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              disabled={creating}
-              className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-xl shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
-            >
-              {creating ? (
-                <span className="flex items-center gap-2">
-                  <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Creating User...
-                </span>
-              ) : (
-                <span className="flex items-center gap-2">
-                  <UserPlus size={18} />
-                  Create User
-                </span>
-              )}
-            </button>
-          </div>
-        </form>
       </div>
+
+      {/* Create User Card - Now Collapsible */}
+      {showCreateForm && (
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 animate-fadeIn">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-100 to-indigo-50 flex items-center justify-center">
+              <UserPlus className="text-indigo-600" size={22} />
+            </div>
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900">Create New User</h2>
+              <p className="text-sm text-gray-500">Add new users to the Velion DKN system</p>
+            </div>
+          </div>
+
+          <form onSubmit={createUser} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Name */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <User size={14} />
+                  Full Name *
+                </label>
+                <input
+                  type="text"
+                  value={form.name}
+                  onChange={(e) => setField("name", e.target.value)}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                  placeholder="John Consultant"
+                  required
+                />
+              </div>
+
+              {/* Email */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <Mail size={14} />
+                  Email Address *
+                </label>
+                <input
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => setField("email", e.target.value)}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                  placeholder="name@velion.com"
+                  required
+                />
+              </div>
+
+              {/* Password */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <Key size={14} />
+                  Password *
+                </label>
+                <input
+                  type="text"
+                  value={form.password}
+                  onChange={(e) => setField("password", e.target.value)}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                  required
+                />
+  
+              </div>
+
+              {/* Role */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <Shield size={14} />
+                  Role *
+                </label>
+                <select
+                  value={form.role}
+                  onChange={(e) => setField("role", e.target.value)}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                >
+                  <option value="CONSULTANT">Consultant</option>
+                  <option value="CHAMPION">Knowledge Champion</option>
+                  <option value="ADMIN">System Administrator</option>
+                </select>
+              </div>
+
+              {/* Region */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <Globe size={14} />
+                  Region *
+                </label>
+                <select
+                  value={form.region}
+                  onChange={(e) => setField("region", e.target.value)}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                >
+                  <option value="EU">Europe (EU)</option>
+                  <option value="ASIA">Asia</option>
+                  <option value="NA">North America</option>
+                  <option value="GLOBAL">Global</option>
+                </select>
+              </div>
+
+              {/* Expertise */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <Briefcase size={14} />
+                  Expertise
+                </label>
+                <input
+                  type="text"
+                  value={form.expertise}
+                  onChange={(e) => setField("expertise", e.target.value)}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                  placeholder="React, Security, AI, etc."
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setShowCreateForm(false)}
+                className="px-6 py-3 bg-white border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={creating}
+                className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium rounded-xl shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+              >
+                {creating ? (
+                  <span className="flex items-center gap-2">
+                    <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Creating User...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    <UserPlus size={18} />
+                    Create User
+                  </span>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {/* Users List */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">

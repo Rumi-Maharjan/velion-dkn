@@ -73,4 +73,43 @@ router.post("/users", async (req, res) => {
   }
 });
 
+// PUT /api/admin/users/:id  (update user)
+router.put("/users/:id", async (req, res) => {
+  try {
+    const userId = Number(req.params.id);
+    const { name, role, region, expertise } = req.body || {};
+
+    if (!userId || !name || !role || !region) {
+      return res.status(400).json({ message: "id, name, role, region are required" });
+    }
+
+    const allowedRoles = ["CONSULTANT", "CHAMPION", "ADMIN"];
+    if (!allowedRoles.includes(role)) {
+      return res.status(400).json({ message: "role must be CONSULTANT, CHAMPION, or ADMIN" });
+    }
+
+    await runAsync(
+      `UPDATE users SET name = ?, role = ?, region = ?, expertise = ? WHERE id = ?`,
+      [name, role, region, expertise || "", userId]
+    );
+
+    res.json({ message: "User updated" });
+  } catch (e) {
+    res.status(500).json({ message: "Failed to update user", error: e.message });
+  }
+});
+
+// DELETE /api/admin/users/:id  (delete user)
+router.delete("/users/:id", async (req, res) => {
+  try {
+    const userId = Number(req.params.id);
+    if (!userId) return res.status(400).json({ message: "invalid id" });
+
+    await runAsync(`DELETE FROM users WHERE id = ?`, [userId]);
+    res.json({ message: "User deleted" });
+  } catch (e) {
+    res.status(500).json({ message: "Failed to delete user", error: e.message });
+  }
+});
+
 module.exports = router;
