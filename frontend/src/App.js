@@ -35,7 +35,7 @@ export default function App() {
 
   // Check screen size for mobile
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
@@ -188,31 +188,6 @@ export default function App() {
                 </div>
               </div>
             </div>
-
-            {/* Component Status */}
-            {/* <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h3 className="font-semibold text-gray-900 mb-4">System Components</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {[
-                  { name: "Knowledge Repository", status: "active", color: "blue" },
-                  { name: "Governance System", status: isChampion || isAdmin ? "active" : "restricted", color: "amber" },
-                  { name: "AI Recommendations", status: "active", color: "purple" },
-                  { name: "Collaboration Workspace", status: "active", color: "green" },
-                ].map((component) => (
-                  <div key={component.name} className="p-4 rounded-lg border border-gray-200">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="text-sm font-medium text-gray-900">{component.name}</h4>
-                      <div className={`h-2 w-2 rounded-full ${component.status === "active" ? "bg-green-500" : "bg-gray-300"}`}></div>
-                    </div>
-                    <p className="text-xs text-gray-500">
-                      Status: <span className={`font-medium ${component.status === "active" ? "text-green-600" : "text-gray-600"}`}>
-                        {component.status === "active" ? "Online" : "Restricted"}
-                      </span>
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div> */}
           </div>
         );
       case "repository":
@@ -264,13 +239,13 @@ export default function App() {
           {/* Sidebar Overlay for Mobile */}
           {sidebarOpen && isMobile && (
             <div
-              className="fixed inset-0 bg-black/50 z-40 md:hidden"
+              className="fixed inset-0 bg-black/50 z-40 lg:hidden"
               onClick={() => setSidebarOpen(false)}
             />
           )}
 
           {/* Sidebar */}
-          <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform ${sidebarOpen || !isMobile ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 transition-transform duration-200`}>
+          <aside className={`fixed max-h-screelg:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform ${sidebarOpen || !isMobile ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 transition-transform duration-200`}>
             <div className="h-full flex flex-col">
               {/* Logo */}
               <div className="p-6 border-b border-gray-200">
@@ -314,7 +289,7 @@ export default function App() {
 
               {/* User Profile & Logout */}
               <div className="p-4 border-t border-gray-200">
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 mb-3">
+                {/* <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 mb-3">
                   <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center">
                     <User className="text-blue-600" size={18} />
                   </div>
@@ -322,7 +297,7 @@ export default function App() {
                     <p className="font-medium text-gray-900 truncate">{user.name}</p>
                     <p className="text-xs text-gray-500 truncate">{user.email}</p>
                   </div>
-                </div>
+                </div> */}
                 <button
                   onClick={handleLogout}
                   className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-red-50 hover:text-red-700 transition-colors"
@@ -335,13 +310,13 @@ export default function App() {
           </aside>
 
           {/* Main Content */}
-          <div className="flex-1">
+          <div className="flex-1 lg:pl-64">
             <main className="min-h-screen">
               {/* Desktop Header */}
-              <header className="hidden md:block bg-white border-b border-gray-200 px-8 py-5">
+              <header className="hidden lg:block bg-white border-b border-gray-200 px-8 py-5 fixed top-0 w-full lg:pr-72">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-xl font-semibold text-gray-900 capitalize">
+                    <h2 className="text-2xl font-semibold text-gray-900 capitalize">
                       {activeTab === "dashboard" ? "Dashboard" : navItems.find(item => item.id === activeTab)?.label}
                     </h2>
                     <p className="text-sm text-gray-500">
@@ -361,7 +336,7 @@ export default function App() {
               </header>
 
               {/* Content Area */}
-              <div className="p-4 md:p-8">
+              <div className="p-4 md:p-8 lg:mt-24">
                 {renderContent()}
               </div>
             </main>

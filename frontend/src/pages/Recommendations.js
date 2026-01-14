@@ -1,27 +1,25 @@
-import { useEffect, useState } from "react";
-import { api } from "../api";
-import { toast } from "react-toastify";
 import {
-  Sparkles,
-  TrendingUp,
-  ThumbsUp,
+  BarChart3,
+  BookOpen,
+  ChevronRight,
   Clock,
-  User,
-  Globe,
   Download,
   Eye,
   FileText,
   FileType,
-  Tag,
-  Filter,
   RefreshCw,
-  Star,
-  BookOpen,
-  Zap,
-  ChevronRight,
+  Sparkles,
+  Tag,
   Target,
-  BarChart3
+  ThumbsUp,
+  TrendingUp,
+  User,
+  Zap,
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import { api } from "../api";
+import { downloadFile } from "../utils/download";
 
 export default function Recommendations() {
   const [items, setItems] = useState([]);
@@ -31,16 +29,18 @@ export default function Recommendations() {
   const [viewedItems, setViewedItems] = useState(new Set());
   const [likedItems, setLikedItems] = useState(new Set());
 
-  async function loadRecommendations() {
+  async function loadRecommendations(showToast = false) {
     setLoading(true);
     try {
       const res = await api.get("/recommendations");
       setItems(res.data || []);
-      if (res.data?.length > 0) {
+      if (res.data?.length > 0 && showToast) {
         toast.success(`Found ${res.data.length} personalized recommendations`);
       }
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Failed to load recommendations");
+      toast.error(
+        err?.response?.data?.message || "Failed to load recommendations"
+      );
     } finally {
       setLoading(false);
     }
@@ -51,13 +51,13 @@ export default function Recommendations() {
   }, []);
 
   function handleViewItem(id) {
-    setViewedItems(prev => new Set([...prev, id]));
+    setViewedItems((prev) => new Set([...prev, id]));
     // You could send analytics to backend here
     console.log(`Viewed recommendation ${id}`);
   }
 
   function handleLikeItem(id) {
-    setLikedItems(prev => {
+    setLikedItems((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(id)) {
         newSet.delete(id);
@@ -71,15 +71,16 @@ export default function Recommendations() {
   }
 
   // Filter items based on type and region
-  const filteredItems = items.filter(item => {
+  const filteredItems = items.filter((item) => {
     const matchesType = filterType === "ALL" || item.type === filterType;
-    const matchesRegion = filterRegion === "ALL" || item.region === filterRegion;
+    const matchesRegion =
+      filterRegion === "ALL" || item.region === filterRegion;
     return matchesType && matchesRegion;
   });
 
   // Get unique regions from actual data
-  const uniqueRegions = [...new Set(items.map(item => item.region))];
-  const uniqueTypes = [...new Set(items.map(item => item.type))];
+  const uniqueRegions = [...new Set(items.map((item) => item.region))];
+  const uniqueTypes = [...new Set(items.map((item) => item.type))];
 
   const typeColors = {
     DOCUMENT: "bg-blue-100 text-blue-800 border-blue-200",
@@ -104,11 +105,15 @@ export default function Recommendations() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">AI Recommendations</h1>
-          <p className="text-gray-600 mt-1">Personalized content suggestions based on your profile and activity</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+            AI Recommendations
+          </h1>
+          <p className="text-gray-600 mt-1">
+            Personalized content suggestions based on your profile and activity
+          </p>
         </div>
         <button
-          onClick={loadRecommendations}
+          onClick={() => loadRecommendations(true)}
           disabled={loading}
           className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-xl text-purple-700 hover:bg-purple-100 hover:border-purple-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
@@ -122,8 +127,12 @@ export default function Recommendations() {
         <div className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-xl p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-purple-800">Total Recommendations</p>
-              <p className="text-2xl font-bold text-purple-900 mt-1">{items.length}</p>
+              <p className="text-sm font-medium text-purple-800">
+                Total Recommendations
+              </p>
+              <p className="text-2xl font-bold text-purple-900 mt-1">
+                {items.length}
+              </p>
             </div>
             <Sparkles className="text-purple-600" size={24} />
           </div>
@@ -133,7 +142,7 @@ export default function Recommendations() {
             <div>
               <p className="text-sm font-medium text-blue-800">Documents</p>
               <p className="text-2xl font-bold text-blue-900 mt-1">
-                {items.filter(i => i.type === "DOCUMENT").length}
+                {items.filter((i) => i.type === "DOCUMENT").length}
               </p>
             </div>
             <FileText className="text-blue-600" size={24} />
@@ -156,12 +165,15 @@ export default function Recommendations() {
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">Personalized Suggestions</h2>
+            <h2 className="text-xl font-semibold text-gray-900">
+              Personalized Suggestions
+            </h2>
             <p className="text-sm text-gray-500 mt-1">
-              {filteredItems.length} of {items.length} recommendations match your filters
+              {filteredItems.length} of {items.length} recommendations match
+              your filters
             </p>
           </div>
-          
+
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex gap-2">
               <select
@@ -170,19 +182,23 @@ export default function Recommendations() {
                 className="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm"
               >
                 <option value="ALL">All Types</option>
-                {uniqueTypes.map(type => (
-                  <option key={type} value={type}>{type}</option>
+                {uniqueTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
                 ))}
               </select>
-              
+
               <select
                 value={filterRegion}
                 onChange={(e) => setFilterRegion(e.target.value)}
                 className="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm"
               >
                 <option value="ALL">All Regions</option>
-                {uniqueRegions.map(region => (
-                  <option key={region} value={region}>{region}</option>
+                {uniqueRegions.map((region) => (
+                  <option key={region} value={region}>
+                    {region}
+                  </option>
                 ))}
               </select>
             </div>
@@ -195,16 +211,24 @@ export default function Recommendations() {
             <div className="h-16 w-16 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4 animate-pulse">
               <Sparkles className="text-gray-400" size={28} />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Analyzing your profile...</h3>
-            <p className="text-gray-500">Generating personalized recommendations</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              Analyzing your profile...
+            </h3>
+            <p className="text-gray-500">
+              Generating personalized recommendations
+            </p>
           </div>
         ) : filteredItems.length === 0 ? (
           <div className="p-12 text-center">
             <div className="h-16 w-16 mx-auto bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mb-4">
               <Target className="text-purple-600" size={28} />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No matching recommendations</h3>
-            <p className="text-gray-500 mb-4">Try adjusting your filters or check back later for new content</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No matching recommendations
+            </h3>
+            <p className="text-gray-500 mb-4">
+              Try adjusting your filters or check back later for new content
+            </p>
             <button
               onClick={() => {
                 setFilterType("ALL");
@@ -222,21 +246,27 @@ export default function Recommendations() {
                 {/* Confidence Score Indicator */}
                 {item.confidence_score && (
                   <div className="absolute -top-2 -right-2 z-10">
-                    <div className={`text-xs font-medium px-2.5 py-1 rounded-full border ${confidenceColors(item.confidence_score)}`}>
+                    <div
+                      className={`text-xs font-medium px-2.5 py-1 rounded-full border ${confidenceColors(
+                        item.confidence_score
+                      )}`}
+                    >
                       {Math.round(item.confidence_score * 100)}% match
                     </div>
                   </div>
                 )}
-                
+
                 <div className="bg-white border border-gray-200 rounded-2xl p-6 hover:border-purple-300 hover:shadow-lg transition-all duration-300 h-full">
                   {/* Header */}
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
-                      <div className={`h-12 w-12 rounded-xl flex items-center justify-center ${
-                        item.type === "DOCUMENT" 
-                          ? "bg-gradient-to-br from-blue-100 to-blue-50" 
-                          : "bg-gradient-to-br from-purple-100 to-purple-50"
-                      }`}>
+                      <div
+                        className={`h-12 w-12 rounded-xl flex items-center justify-center ${
+                          item.type === "DOCUMENT"
+                            ? "bg-gradient-to-br from-blue-100 to-blue-50"
+                            : "bg-gradient-to-br from-purple-100 to-purple-50"
+                        }`}
+                      >
                         {item.type === "DOCUMENT" ? (
                           <FileText className="text-blue-600" size={24} />
                         ) : (
@@ -248,10 +278,20 @@ export default function Recommendations() {
                           {item.title}
                         </h3>
                         <div className="flex flex-wrap items-center gap-2 mt-1">
-                          <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${typeColors[item.type] || "bg-gray-100 text-gray-800 border-gray-200"}`}>
+                          <span
+                            className={`text-xs font-medium px-2.5 py-1 rounded-full border ${
+                              typeColors[item.type] ||
+                              "bg-gray-100 text-gray-800 border-gray-200"
+                            }`}
+                          >
                             {item.type}
                           </span>
-                          <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${regionColors[item.region] || "bg-gray-100 text-gray-700 border-gray-300"}`}>
+                          <span
+                            className={`text-xs font-medium px-2.5 py-1 rounded-full border ${
+                              regionColors[item.region] ||
+                              "bg-gray-100 text-gray-700 border-gray-300"
+                            }`}
+                          >
                             {item.region}
                           </span>
                           {item.status && (
@@ -275,7 +315,10 @@ export default function Recommendations() {
                   {item.recommendation_reason && (
                     <div className="mb-4 p-3 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl border border-purple-100">
                       <div className="flex items-start gap-2">
-                        <Zap size={16} className="text-purple-600 mt-0.5 flex-shrink-0" />
+                        <Zap
+                          size={16}
+                          className="text-purple-600 mt-0.5 flex-shrink-0"
+                        />
                         <p className="text-sm text-purple-800 font-medium">
                           {item.recommendation_reason}
                         </p>
@@ -309,7 +352,9 @@ export default function Recommendations() {
                     {item.created_at && (
                       <div className="flex items-center gap-1">
                         <Clock size={14} />
-                        <span>{new Date(item.created_at).toLocaleDateString()}</span>
+                        <span>
+                          {new Date(item.created_at).toLocaleDateString()}
+                        </span>
                       </div>
                     )}
                     {viewedItems.has(item.id) && (
@@ -336,17 +381,21 @@ export default function Recommendations() {
                         </a>
                       )}
                       {item.file_url && (
-                        <a
-                          href={`http://localhost:5000${item.file_url}`}
-                          download
+                        <button
+                          onClick={() =>
+                            downloadFile(
+                              `http://localhost:5000${item.file_url}`
+                            )
+                          }
                           className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900"
+                          title="Download"
                         >
                           <Download size={16} />
                           Download
-                        </a>
+                        </button>
                       )}
                     </div>
-                    
+
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleLikeItem(item.id)}
@@ -355,11 +404,20 @@ export default function Recommendations() {
                             ? "text-pink-600 bg-pink-50 hover:bg-pink-100"
                             : "text-gray-400 hover:text-pink-600 hover:bg-pink-50"
                         }`}
-                        title={likedItems.has(item.id) ? "Remove from liked" : "Add to liked"}
+                        title={
+                          likedItems.has(item.id)
+                            ? "Remove from liked"
+                            : "Add to liked"
+                        }
                       >
-                        <ThumbsUp size={18} fill={likedItems.has(item.id) ? "currentColor" : "none"} />
+                        <ThumbsUp
+                          size={18}
+                          fill={
+                            likedItems.has(item.id) ? "currentColor" : "none"
+                          }
+                        />
                       </button>
-                      
+
                       {item.file_url && (
                         <a
                           href={`http://localhost:5000${item.file_url}`}
@@ -388,11 +446,15 @@ export default function Recommendations() {
               <Sparkles className="text-white" size={22} />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">AI Insights</h3>
-              <p className="text-sm text-gray-600">How recommendations are personalized for you</p>
+              <h3 className="text-lg font-semibold text-gray-900">
+                AI Insights
+              </h3>
+              <p className="text-sm text-gray-600">
+                How recommendations are personalized for you
+              </p>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-purple-100">
               <div className="flex items-center gap-2 mb-2">
@@ -400,27 +462,32 @@ export default function Recommendations() {
                 <h4 className="font-medium text-gray-900">Based on Profile</h4>
               </div>
               <p className="text-sm text-gray-600">
-                Your role, expertise, and region influence what content is suggested
+                Your role, expertise, and region influence what content is
+                suggested
               </p>
             </div>
-            
+
             <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-purple-100">
               <div className="flex items-center gap-2 mb-2">
                 <TrendingUp size={16} className="text-purple-600" />
                 <h4 className="font-medium text-gray-900">Trend Analysis</h4>
               </div>
               <p className="text-sm text-gray-600">
-                Popular content in your department and recent uploads are prioritized
+                Popular content in your department and recent uploads are
+                prioritized
               </p>
             </div>
-            
+
             <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-purple-100">
               <div className="flex items-center gap-2 mb-2">
                 <BarChart3 size={16} className="text-purple-600" />
-                <h4 className="font-medium text-gray-900">Continuous Learning</h4>
+                <h4 className="font-medium text-gray-900">
+                  Continuous Learning
+                </h4>
               </div>
               <p className="text-sm text-gray-600">
-                The AI improves suggestions based on your interactions with recommended content
+                The AI improves suggestions based on your interactions with
+                recommended content
               </p>
             </div>
           </div>

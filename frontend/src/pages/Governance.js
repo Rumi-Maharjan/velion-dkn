@@ -1,23 +1,21 @@
-import { useEffect, useState } from "react";
-import { api } from "../api";
-import { toast } from "react-toastify";
 import {
-  ShieldCheck,
-  CheckCircle,
-  XCircle,
-  Eye,
-  Download,
   AlertCircle,
+  CheckCircle,
   Clock,
-  User,
-  Globe,
+  Download,
+  Eye,
   FileText,
-  RefreshCw,
-  Filter,
-  Search,
   FileType,
-  Tag
+  RefreshCw,
+  Search,
+  Tag,
+  User,
+  XCircle,
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import { api } from "../api";
+import { downloadFile } from "../utils/download";
 
 export default function Governance() {
   const [items, setItems] = useState([]);
@@ -35,7 +33,9 @@ export default function Governance() {
       const res = await api.get("/governance/pending");
       setItems(res.data || []);
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Failed to load pending items");
+      toast.error(
+        err?.response?.data?.message || "Failed to load pending items"
+      );
     } finally {
       setLoading(false);
     }
@@ -48,17 +48,17 @@ export default function Governance() {
   async function approveItem(id, title) {
     setProcessingId(id);
     const toastId = toast.loading(`Approving "${title}"...`);
-    
+
     try {
       await api.post(`/governance/${id}/approve`);
-      
+
       toast.update(toastId, {
         render: `"${title}" approved successfully!`,
         type: "success",
         isLoading: false,
         autoClose: 3000,
       });
-      
+
       await loadItems();
     } catch (err) {
       toast.update(toastId, {
@@ -80,17 +80,17 @@ export default function Governance() {
 
     setProcessingId(id);
     const toastId = toast.loading(`Rejecting "${title}"...`);
-    
+
     try {
       await api.post(`/governance/${id}/reject`, { reason: rejectReason });
-      
+
       toast.update(toastId, {
         render: `"${title}" rejected with feedback provided`,
         type: "warning",
         isLoading: false,
         autoClose: 3000,
       });
-      
+
       setShowRejectModal(null);
       setRejectReason("");
       await loadItems();
@@ -107,14 +107,16 @@ export default function Governance() {
   }
 
   // Filter items
-  const filteredItems = items.filter(item => {
-    const matchesSearch = searchQuery === "" || 
+  const filteredItems = items.filter((item) => {
+    const matchesSearch =
+      searchQuery === "" ||
       item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.description?.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesRegion = filterRegion === "ALL" || item.region === filterRegion;
+
+    const matchesRegion =
+      filterRegion === "ALL" || item.region === filterRegion;
     const matchesType = filterType === "ALL" || item.type === filterType;
-    
+
     return matchesSearch && matchesRegion && matchesType;
   });
 
@@ -131,20 +133,26 @@ export default function Governance() {
   };
 
   // Get unique regions for filter
-  const uniqueRegions = [...new Set(items.map(item => item.region))];
+  const uniqueRegions = [...new Set(items.map((item) => item.region))];
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Content Governance</h1>
-          <p className="text-gray-600 mt-1">Review and validate submitted knowledge content</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+            Content Governance
+          </h1>
+          <p className="text-gray-600 mt-1">
+            Review and validate submitted knowledge content
+          </p>
         </div>
         <div className="flex items-center gap-3">
-          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm ${
-            loading ? "bg-blue-50 text-blue-700" : "bg-gray-100 text-gray-700"
-          }`}>
+          <div
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm ${
+              loading ? "bg-blue-50 text-blue-700" : "bg-gray-100 text-gray-700"
+            }`}
+          >
             {loading ? (
               <>
                 <div className="h-3 w-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
@@ -173,8 +181,12 @@ export default function Governance() {
         <div className="bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 rounded-xl p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-amber-800">Pending Review</p>
-              <p className="text-2xl font-bold text-amber-900 mt-1">{items.length}</p>
+              <p className="text-sm font-medium text-amber-800">
+                Pending Review
+              </p>
+              <p className="text-2xl font-bold text-amber-900 mt-1">
+                {items.length}
+              </p>
             </div>
             <Clock className="text-amber-600" size={24} />
           </div>
@@ -184,7 +196,7 @@ export default function Governance() {
             <div>
               <p className="text-sm font-medium text-blue-800">Documents</p>
               <p className="text-2xl font-bold text-blue-900 mt-1">
-                {items.filter(i => i.type === "DOCUMENT").length}
+                {items.filter((i) => i.type === "DOCUMENT").length}
               </p>
             </div>
             <FileText className="text-blue-600" size={24} />
@@ -195,7 +207,7 @@ export default function Governance() {
             <div>
               <p className="text-sm font-medium text-purple-800">Templates</p>
               <p className="text-2xl font-bold text-purple-900 mt-1">
-                {items.filter(i => i.type === "TEMPLATE").length}
+                {items.filter((i) => i.type === "TEMPLATE").length}
               </p>
             </div>
             <FileType className="text-purple-600" size={24} />
@@ -207,16 +219,21 @@ export default function Governance() {
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">Pending Content</h2>
+            <h2 className="text-xl font-semibold text-gray-900">
+              Pending Content
+            </h2>
             <p className="text-sm text-gray-500 mt-1">
               {filteredItems.length} of {items.length} items need review
             </p>
           </div>
-          
+
           <div className="flex flex-col sm:flex-row gap-3">
             {/* Search */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              <Search
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                size={18}
+              />
               <input
                 type="text"
                 value={searchQuery}
@@ -225,7 +242,7 @@ export default function Governance() {
                 placeholder="Search pending items..."
               />
             </div>
-            
+
             {/* Filters */}
             <div className="flex gap-2">
               <select
@@ -234,11 +251,13 @@ export default function Governance() {
                 className="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm"
               >
                 <option value="ALL">All Regions</option>
-                {uniqueRegions.map(region => (
-                  <option key={region} value={region}>{region}</option>
+                {uniqueRegions.map((region) => (
+                  <option key={region} value={region}>
+                    {region}
+                  </option>
                 ))}
               </select>
-              
+
               <select
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value)}
@@ -258,7 +277,9 @@ export default function Governance() {
             <div className="h-16 w-16 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4 animate-pulse">
               <RefreshCw className="text-gray-400" size={28} />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Loading content...</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              Loading content...
+            </h3>
             <p className="text-gray-500">Fetching items pending review</p>
           </div>
         ) : filteredItems.length === 0 ? (
@@ -266,13 +287,20 @@ export default function Governance() {
             <div className="h-16 w-16 mx-auto bg-green-100 rounded-full flex items-center justify-center mb-4">
               <CheckCircle className="text-green-600" size={28} />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">All caught up!</h3>
-            <p className="text-gray-500">No pending items require review at this time</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              All caught up!
+            </h3>
+            <p className="text-gray-500">
+              No pending items require review at this time
+            </p>
           </div>
         ) : (
           <div className="space-y-4">
             {filteredItems.map((item) => (
-              <div key={item.id} className="bg-white border border-gray-200 rounded-xl p-5 hover:border-gray-300 transition-all">
+              <div
+                key={item.id}
+                className="bg-white border border-gray-200 rounded-xl p-5 hover:border-gray-300 transition-all"
+              >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
@@ -284,12 +312,24 @@ export default function Governance() {
                         )}
                       </div>
                       <div>
-                        <h3 className="font-semibold text-gray-900 text-lg">{item.title}</h3>
+                        <h3 className="font-semibold text-gray-900 text-lg">
+                          {item.title}
+                        </h3>
                         <div className="flex flex-wrap items-center gap-2 mt-1">
-                          <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${typeColors[item.type] || "bg-gray-100 text-gray-800 border-gray-200"}`}>
+                          <span
+                            className={`text-xs font-medium px-2.5 py-1 rounded-full border ${
+                              typeColors[item.type] ||
+                              "bg-gray-100 text-gray-800 border-gray-200"
+                            }`}
+                          >
                             {item.type}
                           </span>
-                          <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${regionColors[item.region] || "bg-gray-100 text-gray-700 border-gray-300"}`}>
+                          <span
+                            className={`text-xs font-medium px-2.5 py-1 rounded-full border ${
+                              regionColors[item.region] ||
+                              "bg-gray-100 text-gray-700 border-gray-300"
+                            }`}
+                          >
                             {item.region}
                           </span>
                           <span className="text-xs font-medium px-2.5 py-1 rounded-full border bg-amber-100 text-amber-800 border-amber-200">
@@ -298,9 +338,11 @@ export default function Governance() {
                         </div>
                       </div>
                     </div>
-                    
+
                     {item.description && (
-                      <p className="text-gray-600 text-sm mt-2">{item.description}</p>
+                      <p className="text-gray-600 text-sm mt-2">
+                        {item.description}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -310,13 +352,21 @@ export default function Governance() {
                   {item.uploaded_by_name && (
                     <div className="flex items-center gap-1">
                       <User size={14} />
-                      <span>Uploaded by: <span className="font-medium">{item.uploaded_by_name}</span></span>
+                      <span>
+                        Uploaded by:{" "}
+                        <span className="font-medium">
+                          {item.uploaded_by_name}
+                        </span>
+                      </span>
                     </div>
                   )}
                   {item.created_at && (
                     <div className="flex items-center gap-1">
                       <Clock size={14} />
-                      <span>Submitted: {new Date(item.created_at).toLocaleDateString()}</span>
+                      <span>
+                        Submitted:{" "}
+                        {new Date(item.created_at).toLocaleDateString()}
+                      </span>
                     </div>
                   )}
                   {item.tags && item.tags.length > 0 && (
@@ -324,7 +374,10 @@ export default function Governance() {
                       <Tag size={14} />
                       <div className="flex flex-wrap gap-1">
                         {item.tags.map((tag, index) => (
-                          <span key={index} className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
+                          <span
+                            key={index}
+                            className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded"
+                          >
                             {tag}
                           </span>
                         ))}
@@ -348,14 +401,18 @@ export default function Governance() {
                           Preview Content
                         </a>
                         <span className="text-gray-400">|</span>
-                        <a
-                          href={`http://localhost:5000${item.file_url}`}
-                          download
+                        <button
+                          onClick={() =>
+                            downloadFile(
+                              `http://localhost:5000${item.file_url}`
+                            )
+                          }
                           className="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900"
+                          title="Download"
                         >
                           <Download size={16} />
                           Download
-                        </a>
+                        </button>
                       </div>
                     )}
                   </div>
@@ -393,11 +450,14 @@ export default function Governance() {
       {showRejectModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl max-w-md w-full p-6">
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Provide Rejection Reason</h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              Provide Rejection Reason
+            </h3>
             <p className="text-gray-600 mb-4">
-              Please explain why this content is being rejected. This feedback will be sent to the uploader.
+              Please explain why this content is being rejected. This feedback
+              will be sent to the uploader.
             </p>
-            
+
             <textarea
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
@@ -405,7 +465,7 @@ export default function Governance() {
               className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none mb-4 resize-none"
               placeholder="Enter specific feedback for improvement..."
             />
-            
+
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => {
@@ -419,10 +479,12 @@ export default function Governance() {
               </button>
               <button
                 onClick={() => {
-                  const item = items.find(i => i.id === showRejectModal);
+                  const item = items.find((i) => i.id === showRejectModal);
                   if (item) rejectItem(item.id, item.title);
                 }}
-                disabled={!rejectReason.trim() || processingId === showRejectModal}
+                disabled={
+                  !rejectReason.trim() || processingId === showRejectModal
+                }
                 className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {processingId === showRejectModal ? (

@@ -1,30 +1,29 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { api } from "../api";
-import { toast } from "react-toastify";
 import {
-  Users,
+  ChevronRight,
+  Clock,
+  Download,
+  FileText,
   MessageSquare,
-  Share2,
+  Paperclip,
+  Plus,
+  RefreshCw,
   Search,
   Send,
-  Plus,
-  FileText,
-  Download,
-  UserPlus,
-  Clock,
-  ChevronRight,
-  RefreshCw,
-  Paperclip,
   Settings,
-  X,
-  CheckCircle
+  Share2,
+  UserPlus,
+  Users,
 } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "react-toastify";
+import { api } from "../api";
+import { downloadFile } from "../utils/download";
 
 export default function Collaboration() {
   const [workspaces, setWorkspaces] = useState([]);
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(false);
-  
+
   // Get current user - using velion_user from your login
   const currentUser = JSON.parse(localStorage.getItem("velion_user") || "null");
   const currentUserId = currentUser?.id;
@@ -91,12 +90,12 @@ export default function Collaboration() {
 
   /* ---------------- LOADERS ---------------- */
 
-  async function loadWorkspaces() {
+  async function loadWorkspaces(showToast = false) {
     setLoading(true);
     try {
       const res = await api.get("/collaboration/workspaces");
       setWorkspaces(res.data);
-      toast.success("Workspaces loaded successfully");
+      if (showToast) toast.success("Workspaces loaded successfully");
     } catch (err) {
       toast.error(err?.response?.data?.message || "Failed to load workspaces");
     } finally {
@@ -148,7 +147,7 @@ export default function Collaboration() {
         name: wsName,
         description: wsDesc,
       });
-      
+
       setWsName("");
       setWsDesc("");
       toast.success(`Workspace "${wsName}" created successfully`);
@@ -177,7 +176,7 @@ export default function Collaboration() {
       await api.post(`/collaboration/workspaces/${selected.id}/members`, {
         userId: user.id,
       });
-      
+
       setUserQuery("");
       setUserSuggestions([]);
       toast.success(`Added ${user.name} to workspace`);
@@ -193,7 +192,9 @@ export default function Collaboration() {
     setContentQuery(q);
     if (!q.trim()) return setContentSuggestions([]);
 
-    const res = await api.get(`/content-items/search?q=${encodeURIComponent(q)}`);
+    const res = await api.get(
+      `/content-items/search?q=${encodeURIComponent(q)}`
+    );
     setContentSuggestions(res.data);
   }
 
@@ -250,11 +251,15 @@ export default function Collaboration() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Collaboration Workspaces</h1>
-          <p className="text-gray-600 mt-1">Team collaboration with shared documents and real-time messaging</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+            Collaboration Workspaces
+          </h1>
+          <p className="text-gray-600 mt-1">
+            Team collaboration with shared documents and real-time messaging
+          </p>
         </div>
         <button
-          onClick={loadWorkspaces}
+          onClick={() => loadWorkspaces(true)}
           disabled={loading}
           className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
@@ -270,15 +275,21 @@ export default function Collaboration() {
             <Plus className="text-blue-600" size={22} />
           </div>
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">Create New Workspace</h2>
-            <p className="text-sm text-gray-500">Start a new collaboration space for your team</p>
+            <h2 className="text-xl font-semibold text-gray-900">
+              Create New Workspace
+            </h2>
+            <p className="text-sm text-gray-500">
+              Start a new collaboration space for your team
+            </p>
           </div>
         </div>
 
         <form onSubmit={createWorkspace} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Workspace Name *</label>
+              <label className="text-sm font-medium text-gray-700">
+                Workspace Name *
+              </label>
               <input
                 type="text"
                 value={wsName}
@@ -290,7 +301,9 @@ export default function Collaboration() {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Description</label>
+              <label className="text-sm font-medium text-gray-700">
+                Description
+              </label>
               <input
                 type="text"
                 value={wsDesc}
@@ -329,8 +342,12 @@ export default function Collaboration() {
         {/* Workspace List */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">Your Workspaces</h2>
-            <span className="text-sm text-gray-500">{workspaces.length} total</span>
+            <h2 className="text-xl font-semibold text-gray-900">
+              Your Workspaces
+            </h2>
+            <span className="text-sm text-gray-500">
+              {workspaces.length} total
+            </span>
           </div>
 
           {loading ? (
@@ -345,8 +362,12 @@ export default function Collaboration() {
               <div className="h-16 w-16 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
                 <Users className="text-gray-400" size={28} />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No workspaces yet</h3>
-              <p className="text-gray-500">Create your first workspace to start collaborating</p>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No workspaces yet
+              </h3>
+              <p className="text-gray-500">
+                Create your first workspace to start collaborating
+              </p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -367,11 +388,13 @@ export default function Collaboration() {
                         {ws.description || "No description"}
                       </p>
                     </div>
-                    <div className={`text-xs font-medium px-2 py-1 rounded-full ${
-                      ws.my_role === "owner" || ws.my_role === "Owner"
-                        ? "bg-green-100 text-green-800" 
-                        : "bg-blue-100 text-blue-800"
-                    }`}>
+                    <div
+                      className={`text-xs font-medium px-2 py-1 rounded-full ${
+                        ws.my_role === "owner" || ws.my_role === "Owner"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-blue-100 text-blue-800"
+                      }`}
+                    >
                       {ws.my_role}
                     </div>
                   </div>
@@ -400,8 +423,13 @@ export default function Collaboration() {
               <div className="h-20 w-20 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-6">
                 <MessageSquare className="text-gray-400" size={32} />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Select a Workspace</h3>
-              <p className="text-gray-600">Choose a workspace from the list to start collaborating with your team</p>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Select a Workspace
+              </h3>
+              <p className="text-gray-600">
+                Choose a workspace from the list to start collaborating with
+                your team
+              </p>
             </div>
           ) : (
             <div className="space-y-6">
@@ -409,12 +437,18 @@ export default function Collaboration() {
               <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
                 <div className="flex items-center justify-between mb-6">
                   <div>
-                    <h2 className="text-2xl font-bold text-gray-900">{selected.name}</h2>
-                    <p className="text-gray-600 mt-1">{selected.description || "No description provided"}</p>
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      {selected.name}
+                    </h2>
+                    <p className="text-gray-600 mt-1">
+                      {selected.description || "No description provided"}
+                    </p>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="text-right">
-                      <p className="text-sm font-medium text-gray-900">{members.length} members</p>
+                      <p className="text-sm font-medium text-gray-900">
+                        {members.length} members
+                      </p>
                       <p className="text-xs text-gray-500">Active workspace</p>
                     </div>
                     <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center">
@@ -431,7 +465,10 @@ export default function Collaboration() {
                       Team Members
                     </h3>
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                      <Search
+                        className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                        size={18}
+                      />
                       <input
                         type="text"
                         value={userQuery}
@@ -452,8 +489,12 @@ export default function Collaboration() {
                                   <Users className="text-blue-600" size={14} />
                                 </div>
                                 <div>
-                                  <p className="font-medium text-gray-900">{user.name}</p>
-                                  <p className="text-sm text-gray-500">{user.email}</p>
+                                  <p className="font-medium text-gray-900">
+                                    {user.name}
+                                  </p>
+                                  <p className="text-sm text-gray-500">
+                                    {user.email}
+                                  </p>
                                 </div>
                               </div>
                               <UserPlus size={16} className="text-gray-400" />
@@ -463,24 +504,38 @@ export default function Collaboration() {
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {members.map((member) => (
-                      <div key={member.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                        <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
-                          member.workspace_role === "owner" || member.workspace_role === "Owner"
-                            ? "bg-gradient-to-br from-green-100 to-green-50"
-                            : "bg-gradient-to-br from-blue-100 to-blue-50"
-                        }`}>
-                          <Users className={
-                            member.workspace_role === "owner" || member.workspace_role === "Owner"
-                              ? "text-green-600"
-                              : "text-blue-600"
-                          } size={16} />
+                      <div
+                        key={member.id}
+                        className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
+                      >
+                        <div
+                          className={`h-10 w-10 rounded-full flex items-center justify-center ${
+                            member.workspace_role === "owner" ||
+                            member.workspace_role === "Owner"
+                              ? "bg-gradient-to-br from-green-100 to-green-50"
+                              : "bg-gradient-to-br from-blue-100 to-blue-50"
+                          }`}
+                        >
+                          <Users
+                            className={
+                              member.workspace_role === "owner" ||
+                              member.workspace_role === "Owner"
+                                ? "text-green-600"
+                                : "text-blue-600"
+                            }
+                            size={16}
+                          />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-gray-900 truncate">{member.name}</p>
-                          <p className="text-sm text-gray-500 truncate">{member.email}</p>
+                          <p className="font-medium text-gray-900 truncate">
+                            {member.name}
+                          </p>
+                          <p className="text-sm text-gray-500 truncate">
+                            {member.email}
+                          </p>
                         </div>
                         <span className="text-xs font-medium px-2 py-1 rounded-full bg-white border border-gray-200 text-gray-700">
                           {member.workspace_role}
@@ -496,10 +551,13 @@ export default function Collaboration() {
                     <Share2 size={18} />
                     Share Content
                   </h3>
-                  
+
                   <div className="space-y-3">
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                      <Search
+                        className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                        size={18}
+                      />
                       <input
                         type="text"
                         value={contentQuery}
@@ -508,10 +566,12 @@ export default function Collaboration() {
                         placeholder="Search documents to share..."
                       />
                     </div>
-                    
+
                     {contentSuggestions.length > 0 && (
                       <div className="bg-gray-50 border border-gray-200 rounded-xl p-3">
-                        <p className="text-sm font-medium text-gray-700 mb-2">Select content to share:</p>
+                        <p className="text-sm font-medium text-gray-700 mb-2">
+                          Select content to share:
+                        </p>
                         <div className="space-y-2">
                           {contentSuggestions.map((item) => (
                             <button
@@ -520,18 +580,25 @@ export default function Collaboration() {
                               className="w-full text-left p-3 bg-white border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors flex items-center justify-between"
                             >
                               <div className="flex-1">
-                                <p className="font-medium text-gray-900">{item.title}</p>
+                                <p className="font-medium text-gray-900">
+                                  {item.title}
+                                </p>
                                 <div className="flex items-center gap-2 mt-1">
-                                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${
-                                    item.type === "DOCUMENT" 
-                                      ? "bg-blue-100 text-blue-800 border-blue-200" 
-                                      : "bg-purple-100 text-purple-800 border-purple-200"
-                                  }`}>
+                                  <span
+                                    className={`text-xs font-medium px-2 py-0.5 rounded-full border ${
+                                      item.type === "DOCUMENT"
+                                        ? "bg-blue-100 text-blue-800 border-blue-200"
+                                        : "bg-purple-100 text-purple-800 border-purple-200"
+                                    }`}
+                                  >
                                     {item.type}
                                   </span>
-                                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${
-                                    statusColors[item.status] || "bg-gray-100 text-gray-800 border-gray-200"
-                                  }`}>
+                                  <span
+                                    className={`text-xs font-medium px-2 py-0.5 rounded-full border ${
+                                      statusColors[item.status] ||
+                                      "bg-gray-100 text-gray-800 border-gray-200"
+                                    }`}
+                                  >
                                     {item.status}
                                   </span>
                                 </div>
@@ -562,7 +629,8 @@ export default function Collaboration() {
                     Workspace Chat
                   </h3>
                   <div className="text-sm text-gray-500">
-                    {timeline.length} {timeline.length === 1 ? 'message' : 'messages'}
+                    {timeline.length}{" "}
+                    {timeline.length === 1 ? "message" : "messages"}
                   </div>
                 </div>
 
@@ -582,16 +650,33 @@ export default function Collaboration() {
                       const isShare = item.kind === "share";
 
                       return (
-                        <div key={item.id} className={`flex ${isYou ? "justify-end" : "justify-start"}`}>
-                          <div className={`max-w-[85%] ${isYou ? "items-end" : "items-start"} flex flex-col`}>
+                        <div
+                          key={item.id}
+                          className={`flex ${
+                            isYou ? "justify-end" : "justify-start"
+                          }`}
+                        >
+                          <div
+                            className={`max-w-[85%] ${
+                              isYou ? "items-end" : "items-start"
+                            } flex flex-col`}
+                          >
                             {showHeader && (
-                              <div className={`text-xs mb-1 px-2 ${isYou ? "text-right" : "text-left"}`}>
-                                <span className={`font-medium ${isYou ? "text-blue-600" : "text-gray-600"}`}>
+                              <div
+                                className={`text-xs mb-1 px-2 ${
+                                  isYou ? "text-right" : "text-left"
+                                }`}
+                              >
+                                <span
+                                  className={`font-medium ${
+                                    isYou ? "text-blue-600" : "text-gray-600"
+                                  }`}
+                                >
                                   {isYou ? "You" : item.author}
                                 </span>
                               </div>
                             )}
-                            
+
                             <div
                               className={`rounded-2xl px-4 py-3 ${
                                 isYou
@@ -601,60 +686,118 @@ export default function Collaboration() {
                             >
                               {isShare ? (
                                 <div className="space-y-2">
-                                  <div className={`flex items-center gap-2 ${isYou ? "text-blue-100" : "text-gray-500"}`}>
+                                  <div
+                                    className={`flex items-center gap-2 ${
+                                      isYou ? "text-blue-100" : "text-gray-500"
+                                    }`}
+                                  >
                                     <Share2 size={14} />
-                                    <span className="text-sm">Shared a document</span>
+                                    <span className="text-sm">
+                                      Shared a document
+                                    </span>
                                   </div>
-                                  <div className={`p-3 rounded-lg ${isYou ? "bg-blue-500/30" : "bg-white"} border ${isYou ? "border-blue-400/30" : "border-gray-200"}`}>
+                                  <div
+                                    className={`p-3 rounded-lg ${
+                                      isYou ? "bg-blue-500/30" : "bg-white"
+                                    } border ${
+                                      isYou
+                                        ? "border-blue-400/30"
+                                        : "border-gray-200"
+                                    }`}
+                                  >
                                     <div className="flex items-center gap-2 mb-2">
                                       {item.type === "DOCUMENT" ? (
-                                        <FileText size={16} className={isYou ? "text-white" : "text-blue-600"} />
+                                        <FileText
+                                          size={16}
+                                          className={
+                                            isYou
+                                              ? "text-white"
+                                              : "text-blue-600"
+                                          }
+                                        />
                                       ) : (
-                                        <FileText size={16} className={isYou ? "text-white" : "text-purple-600"} />
+                                        <FileText
+                                          size={16}
+                                          className={
+                                            isYou
+                                              ? "text-white"
+                                              : "text-purple-600"
+                                          }
+                                        />
                                       )}
-                                      <p className="font-semibold">{item.title}</p>
+                                      <p className="font-semibold">
+                                        {item.title}
+                                      </p>
                                     </div>
                                     <div className="flex flex-wrap gap-2 mb-3">
-                                      <span className={`text-xs font-medium px-2 py-1 rounded-full border ${
-                                        isYou 
-                                          ? "bg-blue-500/50 text-white border-blue-400/50"
-                                          : statusColors[item.status] || "bg-gray-100 text-gray-800 border-gray-200"
-                                      }`}>
+                                      <span
+                                        className={`text-xs font-medium px-2 py-1 rounded-full border ${
+                                          isYou
+                                            ? "bg-blue-500/50 text-white border-blue-400/50"
+                                            : statusColors[item.status] ||
+                                              "bg-gray-100 text-gray-800 border-gray-200"
+                                        }`}
+                                      >
                                         {item.status}
                                       </span>
-                                      <span className={`text-xs font-medium px-2 py-1 rounded-full border ${
-                                        isYou 
-                                          ? "bg-blue-500/50 text-white border-blue-400/50"
-                                          : typeColors[item.type] || "bg-gray-100 text-gray-800 border-gray-200"
-                                      }`}>
+                                      <span
+                                        className={`text-xs font-medium px-2 py-1 rounded-full border ${
+                                          isYou
+                                            ? "bg-blue-500/50 text-white border-blue-400/50"
+                                            : typeColors[item.type] ||
+                                              "bg-gray-100 text-gray-800 border-gray-200"
+                                        }`}
+                                      >
                                         {item.type}
                                       </span>
                                     </div>
                                     {item.text && (
-                                      <p className={`text-sm ${isYou ? "text-blue-100" : "text-gray-600"}`}>
+                                      <p
+                                        className={`text-sm ${
+                                          isYou
+                                            ? "text-blue-100"
+                                            : "text-gray-600"
+                                        }`}
+                                      >
                                         {item.text}
                                       </p>
                                     )}
                                     {item.fileUrl && (
-                                      <a
-                                        href={`http://localhost:5000${item.fileUrl}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className={`inline-flex items-center gap-1 text-sm mt-2 ${isYou ? "text-white hover:text-blue-200" : "text-blue-600 hover:text-blue-700"}`}
+                                      <button
+                                        onClick={() =>
+                                          downloadFile(
+                                            `http://localhost:5000${item.fileUrl}`
+                                          )
+                                        }
+                                        className={`inline-flex items-center gap-1 text-sm mt-2 ${
+                                          isYou
+                                            ? "text-white hover:text-blue-200"
+                                            : "text-blue-600 hover:text-blue-700"
+                                        }`}
+                                        title="Download File"
                                       >
                                         <Download size={14} />
                                         Download File
-                                      </a>
+                                      </button>
                                     )}
                                   </div>
                                 </div>
                               ) : (
-                                <p className="text-sm whitespace-pre-wrap">{item.text}</p>
+                                <p className="text-sm whitespace-pre-wrap">
+                                  {item.text}
+                                </p>
                               )}
                             </div>
-                            
-                            <div className={`text-xs mt-1 px-2 ${isYou ? "text-right" : "text-left"} text-gray-500`}>
-                              {new Date(item.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+
+                            <div
+                              className={`text-xs mt-1 px-2 ${
+                                isYou ? "text-right" : "text-left"
+                              } text-gray-500`}
+                            >
+                              {new Date(item.at).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
                             </div>
                           </div>
                         </div>

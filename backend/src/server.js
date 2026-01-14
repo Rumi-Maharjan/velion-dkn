@@ -2,7 +2,10 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 
-require("./db/sqlite"); // ensure DB init runs
+const DB_PATH = process.env.DB_PATH || path.join(__dirname, "db/database.sqlite");
+const UPLOAD_PATH = process.env.UPLOAD_PATH || path.join(__dirname, "../uploads");
+
+require("./db/sqlite")(DB_PATH); // ensure DB init runs
 require("./db/contentSchema");
 require("./db/collaborationSchema");
 
@@ -21,7 +24,7 @@ app.use("/api", require("./routes/auth"));
 // Type Model-based interfaces
 app.use("/api/admin", require("./routes/adminUsers"));
 app.use("/api/content-items", require("./routes/contentItems"));
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+app.use("/uploads", express.static(UPLOAD_PATH));
 app.use("/api/governance", require("./routes/governance"));
 app.use("/api/recommendations", require("./routes/recommendations"));
 app.use("/api/collaboration", require("./routes/collaboration"));
