@@ -9,27 +9,20 @@ function allAsync(sql, params = []) {
   });
 }
 
-router.get("/", requireUser, async (req, res) => {
+// GET /api/users/search?q=rumi
+router.get("/search", requireUser, async (req, res) => {
   try {
-    // Basic heuristic recommendation (AI-inspired)
-    // 1) approved content only
-    // 2) same region as user
-    // 3) newest first
-    const rows = await allAsync(
-      `SELECT * FROM content_items
-       WHERE status = 'APPROVED' AND region = ?
-       ORDER BY created_at DESC
-       LIMIT 5`,
-      [req.user.region]
-    );
+    const q = (req.query.q || "").trim();
+    if (!q) return res.json([]);
 
-    rows.forEach(r => {
-      try {
-        r.tags = r.tags ? JSON.parse(r.tags) : [];
-      } catch {
-        r.tags = [];
-      }
-    });
+    const rows = await allAsync(
+      `SELECT id, name, email, role, region
+       FROM users
+       WHERE name LIKE ? OR email LIKE ?
+       ORDER BY name ASC
+       LIMIT 10`,
+      [`%${q}%`, `%${q}%`]
+    );
 
     res.json(rows);
   } catch (e) {

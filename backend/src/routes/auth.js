@@ -8,14 +8,19 @@ function getAsync(sql, params = []) {
   });
 }
 
-// Demo login (prototype only)
+// POST /api/login
 router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body || {};
+    if (!email || !password) {
+      return res.status(400).json({ message: "email and password are required" });
+    }
+
     const user = await getAsync(
       `SELECT id, email, name, role, region FROM users WHERE email = ? AND password = ?`,
       [email, password]
     );
+
     if (!user) return res.status(401).json({ message: "Invalid credentials" });
     res.json({ user });
   } catch (e) {
