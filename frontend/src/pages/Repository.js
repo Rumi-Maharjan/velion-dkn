@@ -1,5 +1,7 @@
 import {
   CheckCircle,
+  ChevronDown,
+  ChevronUp,
   Clock,
   Download,
   FileText,
@@ -12,8 +14,6 @@ import {
   Upload,
   User,
   XCircle,
-  ChevronDown,
-  ChevronUp,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -106,7 +106,7 @@ export default function Repository() {
 
       // Collapse form after successful upload
       setShowUploadForm(false);
-      
+
       // Reload items
       await loadItems();
     } catch (err) {
@@ -278,19 +278,26 @@ export default function Repository() {
           className="w-full flex items-center justify-between p-6 hover:bg-gray-50 transition-colors"
         >
           <div className="flex items-center gap-3">
-            <div className={`h-10 w-10 rounded-xl flex items-center justify-center transition-all ${
-              showUploadForm 
-                ? "bg-gradient-to-br from-indigo-100 to-indigo-50" 
-                : "bg-gradient-to-br from-blue-100 to-blue-50"
-            }`}>
-              <Upload className={showUploadForm ? "text-indigo-600" : "text-blue-600"} size={22} />
+            <div
+              className={`h-10 w-10 rounded-xl flex items-center justify-center transition-all ${
+                showUploadForm
+                  ? "bg-gradient-to-br from-indigo-100 to-indigo-50"
+                  : "bg-gradient-to-br from-blue-100 to-blue-50"
+              }`}
+            >
+              <Upload
+                className={showUploadForm ? "text-indigo-600" : "text-blue-600"}
+                size={22}
+              />
             </div>
             <div className="text-left">
               <h2 className="text-xl font-semibold text-gray-900">
                 Upload New Content
               </h2>
               <p className="text-sm text-gray-500">
-                {showUploadForm ? "Click to collapse form" : "Click to expand and share knowledge with your organization"}
+                {showUploadForm
+                  ? "Click to collapse form"
+                  : "Click to expand and share knowledge with your organization"}
               </p>
             </div>
           </div>
@@ -665,7 +672,11 @@ export default function Repository() {
                     {item.file_url && (
                       <button
                         onClick={() =>
-                          downloadFile(`http://localhost:5000${item.file_url}`)
+                          downloadFile(
+                            `${process.env.REACT_APP_API_ORIGIN || ""}${
+                              item.file_url
+                            }`
+                          )
                         }
                         className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 hover:underline"
                         title="Download"

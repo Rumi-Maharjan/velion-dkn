@@ -766,7 +766,10 @@ export default function Collaboration() {
                                       <button
                                         onClick={() =>
                                           downloadFile(
-                                            `http://localhost:5000${item.fileUrl}`
+                                            `${
+                                              process.env
+                                                .REACT_APP_API_ORIGIN || ""
+                                            }${item.fileUrl}`
                                           )
                                         }
                                         className={`inline-flex items-center gap-1 text-sm mt-2 ${

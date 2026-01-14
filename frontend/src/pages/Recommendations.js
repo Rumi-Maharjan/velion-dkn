@@ -370,7 +370,9 @@ export default function Recommendations() {
                     <div className="flex items-center gap-3">
                       {item.file_url && (
                         <a
-                          href={`http://localhost:5000${item.file_url}`}
+                          href={`${process.env.REACT_APP_API_ORIGIN || ""}${
+                            item.file_url
+                          }`}
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={() => handleViewItem(item.id)}
@@ -384,7 +386,9 @@ export default function Recommendations() {
                         <button
                           onClick={() =>
                             downloadFile(
-                              `http://localhost:5000${item.file_url}`
+                              `${process.env.REACT_APP_API_ORIGIN || ""}${
+                                item.file_url
+                              }`
                             )
                           }
                           className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900"
@@ -420,7 +424,9 @@ export default function Recommendations() {
 
                       {item.file_url && (
                         <a
-                          href={`http://localhost:5000${item.file_url}`}
+                          href={`${process.env.REACT_APP_API_ORIGIN || ""}${
+                            item.file_url
+                          }`}
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={() => handleViewItem(item.id)}

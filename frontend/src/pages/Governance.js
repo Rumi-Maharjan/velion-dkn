@@ -392,7 +392,9 @@ export default function Governance() {
                     {item.file_url && (
                       <div className="flex items-center gap-2">
                         <a
-                          href={`http://localhost:5000${item.file_url}`}
+                          href={`${process.env.REACT_APP_API_ORIGIN || ""}${
+                            item.file_url
+                          }`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700 hover:underline"
@@ -404,7 +406,9 @@ export default function Governance() {
                         <button
                           onClick={() =>
                             downloadFile(
-                              `http://localhost:5000${item.file_url}`
+                              `${process.env.REACT_APP_API_ORIGIN || ""}${
+                                item.file_url
+                              }`
                             )
                           }
                           className="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900"

@@ -1,7 +1,12 @@
 import axios from "axios";
 
+// Allow overriding API origin at build time via REACT_APP_API_ORIGIN.
+// If provided, `api` base becomes `${ORIGIN}/api`. Otherwise fall back to relative `/api` for local dev proxy.
+const ORIGIN = process.env.REACT_APP_API_ORIGIN || "";
+const BASE = ORIGIN ? ORIGIN.replace(/\/$/, "") + "/api" : "/api";
+
 export const api = axios.create({
-  baseURL: "/api",
+  baseURL: BASE,
   headers: { "Content-Type": "application/json" },
 });
 
