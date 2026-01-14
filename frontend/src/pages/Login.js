@@ -151,6 +151,11 @@ export default function Login({ onLogin }) {
               <a href="#" className="text-blue-600 hover:underline">Privacy Policy</a>.
             </p>
           </div>
+          <div className="mt-4 pt-4 border-t border-gray-100">
+            <p className="text-xs text-gray-500 text-center">
+              <span className="font-medium">Note:</span> Demo account credentials are available in the report for testing.
+            </p>
+          </div>
         </div>
 
       </div>
